@@ -1,4 +1,4 @@
-# Jožin Worker — Face Recognition and tagging (jozag)
+# Jožin Worker — Face Recognition and tagging (joztag)
 
 ## Purpose
 The **jozag worker** is responsible for **face detection, recognition, and tagging** within the Jožin ecosystem. It identifies and groups faces across the image library, producing embeddings and optional person labels for efficient searching and organization.

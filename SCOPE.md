@@ -121,7 +121,7 @@ just face    # start local face-service
 
 ## Index of Worker Scopes
 
-[./SCOPE/jozan-worker.md](jozan-worker: Scans and fingerprints local image libraries, generating detailed JSON sidecars for every file.)
-[./SCOPE/jozync-worker.md](jozync-worker: Synchronizes JSON sidecars with the central database — imports scans, exports user changes, and keeps everything in perfect balance.)
-[./SCOPE/jozag-worker.md](jozag-worker: )
-[./SCOPE/jozimg-worker.md](jozimg-worker: Thumbnails and image adjustments.)
+- [jozan-worker: Scans and fingerprints local image libraries, generating detailed JSON sidecars for every file.](./SCOPE/jozan-worker.md)
+- [jozync-worker: Synchronizes JSON sidecars with the central database — imports scans, exports user changes, and keeps everything in perfect - balance.](./SCOPE/jozync-worker.md)
+- [joztag-worker: Face detection, recognition, and tagging.](./SCOPE/joztag-worker.md)
+- [jozimg-worker: Thumbnails and image adjustments.](./SCOPE/jozimg-worker.md)
