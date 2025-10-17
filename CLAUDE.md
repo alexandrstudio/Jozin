@@ -24,6 +24,7 @@ jozin/
 │  └─ src/
 │     ├─ lib.rs       # Module exports & core API
 │     ├─ scan.rs      # Directory walking, EXIF reading, hash computation
+│     ├─ cleanup.rs   # Remove Jožin-generated files
 │     ├─ verify.rs    # Sidecar validation & staleness detection
 │     ├─ migrate.rs   # Schema version migrations
 │     ├─ faces.rs     # Face detection (feature-gated)
@@ -38,14 +39,15 @@ jozin/
 
 ### Core Modules
 
-The `jozin-core` library is structured into **6 core modules**:
+The `jozin-core` library is structured into **7 core modules**:
 
 1. **scan** - Directory traversal, EXIF extraction, BLAKE3 hashing, sidecar generation
-2. **verify** - Validates sidecar integrity, schema versions, detects staleness
-3. **migrate** - Handles schema version upgrades with backup rotation
-4. **faces** - Face detection & identification (optional feature)
-5. **tags** - ML-based and rule-based automatic tagging (optional feature)
-6. **thumbs** - Multi-size thumbnail generation (optional feature)
+2. **cleanup** - Remove Jožin-generated files (sidecars, thumbnails, backups, cache)
+3. **verify** - Validates sidecar integrity, schema versions, detects staleness
+4. **migrate** - Handles schema version upgrades with backup rotation
+5. **faces** - Face detection & identification (optional feature)
+6. **tags** - ML-based and rule-based automatic tagging (optional feature)
+7. **thumbs** - Multi-size thumbnail generation (optional feature)
 
 All modules share a common **parameter structure** and return machine-readable JSON.
 
@@ -81,6 +83,7 @@ cargo run -p jozin -- scan ./Photos --dry-run
 
 # Run specific commands
 cargo run -p jozin -- scan ~/Pictures --dry-run
+cargo run -p jozin -- cleanup ~/Pictures --only-sidecars --dry-run
 cargo run -p jozin -- verify ~/Pictures
 cargo run -p jozin -- migrate ~/Pictures --to v2
 ```
@@ -121,6 +124,12 @@ jozin <module> [options]
 
 **scan:**
 - `--hash-mode <file|pixel|both>` - Hash computation strategy (Phase 2+)
+
+**cleanup:**
+- `--only-sidecars` - Remove only JSON sidecar files
+- `--only-thumbnails` - Remove only thumbnail files
+- `--only-backups` - Remove only backup files (*.bak1/2/3)
+- `--only-cache` - Remove only cache directories (.jozin/*)
 
 **faces:**
 - `--model <name>` - Face detection model (e.g., `arcface-1.4`)
@@ -194,11 +203,14 @@ The project follows a **phased plan** (see `TASK+PHASE_PLAN.md`):
 
 ### Current State
 
-The codebase is in **early Phase 0/1**:
+The codebase is in **Phase 1**:
 - Workspace structure is set up
-- CLI skeleton exists with basic `scan`, `verify`, `migrate` subcommands
-- Core library has module stubs but minimal functionality
-- `cargo run -p jozin -- scan <path> --dry-run` works but only prints "DRY RUN"
+- CLI fully implements `scan` and `cleanup` subcommands
+- `verify` and `migrate` subcommands are stubs (return parameters as JSON)
+- Phase 2+ modules (`faces`, `tags`, `thumbs`) are feature-gated stubs
+- All core tests passing (58 tests: 23 CLI + 24 core + 11 doc)
+- Zero compiler warnings
+- Production-ready build
 
 ## Key Technical Decisions
 

@@ -31,7 +31,7 @@ Everything runs entirely on your machine — safe, transparent, and reversible.
 ## Architecture
 ```bash
 jozin/
-├─ core/            # Rust library – scan, faces, tags, thumbs, verify, migrate
+├─ core/            # Rust library – scan, cleanup, faces, tags, thumbs, verify, migrate
 │  └─ src/
 ├─ cli/             # CLI binary built on top of the core library
 │  └─ src/main.rs
@@ -46,13 +46,14 @@ jozin/
 ### Components
 
 - **Core (Rust Library)** – the heart of Jožin.
-  Provides scanning, hashing, face detection, tagging, verification, and migration logic.
+  Provides scanning, hashing, cleanup, face detection, tagging, verification, and migration logic.
 
 - **CLI** – a minimal command-line interface built on the core.
   Ideal for automation and testing.
 
 ```bash
   jozin scan ~/Photos --dry-run
+  jozin cleanup ~/Photos --only-sidecars
   jozin verify ~/Photos
 ```
 
@@ -79,23 +80,55 @@ No Docker, no local server — just a native app with full control and visibilit
 ## Development Setup
 
 ### Prerequisites
--	**Rust** ≥ 1.75
--	**Node.js** ≥ 20
--	**Tauri CLI** (cargo install tauri-cli)
--	(Optional) Just task runner (cargo install just)
+- **Rust** ≥ 1.75
+- **Node.js** ≥ 20
+- **Tauri CLI** (cargo install tauri-cli)
+- (Optional) Just task runner (cargo install just)
 
 ### Clone & Build
 ```bash
 git clone https://github.com/yourname/jozin.git
 cd jozin
-just build       # or: cargo build --workspace
+cargo build --workspace
 ```
+
+The build will complete without warnings. All Phase 2+ modules (faces, tags, thumbs) are defined as feature flags with stub implementations ready for future development.
 
 ### Run the CLI
 ```bash
+# Quick test
 just cli
-# or
+
+# Or run directly
 cargo run -p jozin -- scan ~/Pictures --dry-run
+
+# Build release binary
+cargo build --workspace --release
+./target/release/jozin scan ~/Pictures --recursive
+```
+
+### Current Implementation Status
+
+**✅ Phase 1 Complete:**
+- **scan** module - Directory traversal, BLAKE3 hashing, glob filtering
+- **cleanup** module - Remove Jožin-generated files (sidecars, thumbnails, backups, cache)
+- **verify** module - Sidecar validation (stub)
+- **migrate** module - Schema migration (stub)
+- CLI with comprehensive argument parsing
+- Unit and integration tests (58 tests passing)
+
+**🔜 Phase 2+ Planned:**
+- **faces** module - Face detection and identification
+- **tags** module - ML-based and rule-based tagging
+- **thumbs** module - Multi-size thumbnail generation
+
+All Phase 2+ modules are declared as Cargo features and can be enabled when implemented:
+```bash
+# Future: enable face detection
+cargo build --features faces
+
+# Future: enable all features
+cargo build --all-features
 ```
 
 ### Run the Desktop App
@@ -103,6 +136,29 @@ cargo run -p jozin -- scan ~/Pictures --dry-run
 cd app
 npm install
 npm run tauri dev
+```
+
+**Note:** The Tauri app is in early development. For now, use the CLI for testing and development.
+
+### 🎯 Build Status
+
+  ✅ cargo build --workspace          # Zero warnings
+  ✅ cargo build --workspace --release # Zero warnings
+  ✅ cargo test --workspace           # 58 tests passing
+  ✅ ./target/release/jozin --version # Binary works
+
+### Common CLI Commands
+
+```bash
+# Scan photos and generate sidecars
+jozin scan ~/Photos --recursive --dry-run
+jozin scan ~/Photos --recursive
+
+# Cleanup Jožin-generated files
+jozin cleanup ~/Photos --dry-run             # Preview what will be deleted
+jozin cleanup ~/Photos --only-sidecars       # Remove only JSON sidecars
+jozin cleanup ~/Photos --only-thumbnails -r  # Remove only thumbnails recursively
+jozin cleanup ~/Photos --recursive           # Remove all generated files
 ```
 
 ---
