@@ -1,210 +1,468 @@
-# Jožin — The Friendly Monster That Organizes Your Photo Swamp 🐊
+# Jožin — Local-First Photo Organizer
 
-> **Local-first. AI-assisted. 100 % private.**
+> **The friendly monster that organizes your photo swamp.**
 >
-> Jožin scans your messy photo folders, detects duplicates and faces, creates intelligent JSON sidecars — and never uploads a single byte.
+> Local-first. AI-assisted. 100% private.
+
+**Jožin** is a privacy-focused photo organizer written in **Rust** with a **Tauri + React** desktop interface. It scans local photo directories, extracts EXIF metadata, computes BLAKE3 hashes, detects duplicates and faces, and stores all derived information in **JSON sidecar files** adjacent to the original photos. All processing happens locally—no cloud uploads, no external APIs, complete user control.
 
 ---
 
-## Overview
-
-**Jožin** is a privacy-focused, local photo organizer written in **Rust** with a **Tauri + React** desktop interface.
-It brings order to years of scattered photos without touching your originals or requiring any cloud service.
-
-Jožin reads EXIF data, computes fast **BLAKE3** hashes, detects faces and duplicates, and stores structured metadata as **sidecar JSON files**.
-Everything runs entirely on your machine — safe, transparent, and reversible.
-
----
-
-## Key Features
-
-- **Local-first design:** Works entirely offline. No upload, no account, no telemetry.
-- **Immutable originals:** Photos are read-only. All metadata lives beside them in JSON sidecars.
-- **Fast scanning:** Parallel I/O with Rust and BLAKE3 hashing.
-- **Smart organization:** Detects duplicates, near-duplicates, bursts, faces, and series.
-- **Modular architecture:** One binary with clear internal modules — easy to extend, no external services.
-- **Tauri + React UI:** Clean, native desktop experience for macOS, Windows, and Linux.
-- **AI-assisted development:** The project itself is built using modern AI coding assistants (GPT, Claude, Gemini, etc.) as an educational example of human-AI collaboration.
-
----
-
-## Architecture
-```bash
-jozin/
-├─ core/            # Rust library – scan, cleanup, faces, tags, thumbs, verify, migrate
-│  └─ src/
-├─ cli/             # CLI binary built on top of the core library
-│  └─ src/main.rs
-├─ app/             # Tauri + React desktop application
-│  ├─ src-tauri/
-│  └─ src/
-├─ schemas/         # JSON schema definitions for sidecars
-├─ justfile         # Dev commands (build, run, test)
-└─ README.md
-```
-
-### Components
-
-- **Core (Rust Library)** – the heart of Jožin.
-  Provides scanning, hashing, cleanup, face detection, tagging, verification, and migration logic.
-
-- **CLI** – a minimal command-line interface built on the core.
-  Ideal for automation and testing.
+## 🚀 Quick Start (Developers)
 
 ```bash
-  jozin scan ~/Photos --dry-run
-  jozin cleanup ~/Photos --only-sidecars
-  jozin verify ~/Photos
-```
-
-•	App (Tauri + React) – the desktop UI, directly embedding the same Rust core.
-No Docker, no local server — just a native app with full control and visibility.
-
-### Example Folder Layout
-
-```bash
-/photos/
-├─ 2020/
-│  ├─ IMG_1234.JPG
-│  ├─ IMG_1234.JPG.json        # Sidecar with analysis + tags + faces
-│  └─ IMG_1234_thumb.jpg       # Optional generated thumbnail
-└─ .jozin/
-   ├─ _journal.ndjson          # Operation history
-   ├─ _cache/                  # Temporary data and hashes
-   ├─ _trash/                  # Quarantined or deleted files
-   └─ _models/                 # Local ML models for tagging and faces
-```
-
----
-
-## Development Setup
-
-### Prerequisites
-- **Rust** ≥ 1.75
-- **Node.js** ≥ 20
-- **Tauri CLI** (cargo install tauri-cli)
-- (Optional) Just task runner (cargo install just)
-
-### Clone & Build
-```bash
-git clone https://github.com/yourname/jozin.git
+# Clone and build
+git clone <repo-url>
 cd jozin
 cargo build --workspace
-```
 
-The build will complete without warnings. All Phase 2+ modules (faces, tags, thumbs) are defined as feature flags with stub implementations ready for future development.
+# Run CLI tests
+cargo run -p jozin -- scan ./Photos --dry-run
+cargo run -p jozin -- cleanup ./Photos --only-sidecars --dry-run
 
-### Run the CLI
-```bash
-# Quick test
-just cli
+# Run all tests
+cargo test --workspace
 
-# Or run directly
-cargo run -p jozin -- scan ~/Pictures --dry-run
-
-# Build release binary
+# Build release binaries
 cargo build --workspace --release
-./target/release/jozin scan ~/Pictures --recursive
 ```
 
-### Current Implementation Status
+**Current Build Status:**
+- ✅ `cargo build --workspace` - Zero warnings
+- ✅ `cargo test --workspace` - 59 tests passing
+- ✅ Production-ready CLI binary
 
-**✅ Phase 1 Complete:**
-- **scan** module - Directory traversal, BLAKE3 hashing, glob filtering
-- **cleanup** module - Remove Jožin-generated files (sidecars, thumbnails, backups, cache)
-- **verify** module - Sidecar validation (stub)
-- **migrate** module - Schema migration (stub)
-- CLI with comprehensive argument parsing
-- Unit and integration tests (58 tests passing)
+---
 
-**🔜 Phase 2+ Planned:**
-- **faces** module - Face detection and identification
-- **tags** module - ML-based and rule-based tagging
-- **thumbs** module - Multi-size thumbnail generation
+## 📊 Current Development Status
 
-All Phase 2+ modules are declared as Cargo features and can be enabled when implemented:
+**Phase:** Phase 1 - Near Completion (see [TASKMASTER_PLAN.md](TASKMASTER_PLAN.md) for details)
+
+### ✅ Fully Implemented
+
+| Module | Status | Features |
+|--------|--------|----------|
+| **scan** | ✅ Complete | Directory traversal, EXIF extraction, BLAKE3 hashing, sidecar generation |
+| **cleanup** | ✅ Complete | Selective cleanup (sidecars, thumbnails, backups, cache) |
+| **CLI** | ✅ Complete | Full parameter validation, help text, structured JSON output |
+| **Core Infrastructure** | ✅ Complete | Error types, timing metadata, pipeline signatures |
+
+### ⚠️ In Progress (Phase 1)
+
+| Module | Status | Next Steps |
+|--------|--------|------------|
+| **verify** | 10-line stub | Task 1-2: Implement sidecar validation, staleness detection |
+| **migrate** | 10-line stub | Task 3-4: Implement schema migrations with backup rotation |
+
+### 🔒 Planned (Phase 2+)
+
+| Module | Status | Features |
+|--------|--------|----------|
+| **faces** | Feature-gated stub | Face detection and identification (local ONNX models) |
+| **tags** | Feature-gated stub | ML-based and rule-based automatic tagging |
+| **thumbs** | Feature-gated stub | Multi-size thumbnail generation |
+| **Tauri App** | Basic structure | Desktop UI with React (Tasks 6-7) |
+| **Parallelism** | Not started | Bounded thread pools, progress events API |
+| **Journaling** | Not started | Resumable scans, operation history |
+
+**See [TASKMASTER_PLAN.md](TASKMASTER_PLAN.md) for detailed task breakdown (Tasks 1-7).**
+
+---
+
+## 🏗️ Architecture
+
+Jožin is a **Cargo workspace** with three members:
+
+```
+jozin/
+├─ core/              # Rust library (jozin-core) - all photo processing logic
+│  └─ src/
+│     ├─ lib.rs       # Module exports & core API
+│     ├─ scan.rs      # ✅ Directory walking, EXIF, hashing
+│     ├─ cleanup.rs   # ✅ Selective cleanup
+│     ├─ verify.rs    # ⚠️ Sidecar validation (stub)
+│     ├─ migrate.rs   # ⚠️ Schema migrations (stub)
+│     ├─ faces.rs     # 🔒 Face detection (feature-gated)
+│     ├─ tags.rs      # 🔒 ML tagging (feature-gated)
+│     └─ thumbs.rs    # 🔒 Thumbnails (feature-gated)
+├─ cli/               # CLI binary (jozin) - thin wrapper around core
+│  └─ src/main.rs     # ✅ Full implementation
+└─ app/               # Tauri + React desktop app
+   └─ src-tauri/      # 🔒 Basic structure (not implemented)
+      └─ src/
+```
+
+### Core Principles
+
+- **Immutable originals** - Photos are read-only, never modified
+- **Local-first design** - 100% offline capable, no telemetry
+- **Schema-driven metadata** - Versioned JSON sidecars with migrations
+- **Modular monolith** - Single Rust binary, no microservices
+
+---
+
+## 📦 Module Overview
+
+### scan - Photo Scanning & Metadata Extraction
+
+**Status:** ✅ Fully Implemented (core/src/scan.rs)
+
+**Features:**
+- Directory traversal (recursive or non-recursive)
+- Glob pattern filtering (include/exclude)
+- EXIF metadata extraction (camera, GPS, timestamp)
+- BLAKE3 file hashing (ultra-fast parallel hashing)
+- JSON sidecar generation (atomic writes with fsync)
+- Dry-run mode (preview without writing files)
+
+**CLI Usage:**
 ```bash
-# Future: enable face detection
-cargo build --features faces
-
-# Future: enable all features
-cargo build --all-features
+jozin scan ~/Photos --recursive --dry-run
+jozin scan ~/Photos --include "*.jpg,*.png" --exclude "**/tmp/**"
 ```
 
-### Run the Desktop App
+**Output:** JSON with timing metadata and per-file results
+
+---
+
+### cleanup - Remove Generated Files
+
+**Status:** ✅ Fully Implemented (core/src/cleanup.rs)
+
+**Features:**
+- Selective cleanup modes (sidecars, thumbnails, backups, cache)
+- Dry-run mode (preview deletions)
+- Recursive directory processing
+- Glob pattern filtering
+- Safe deletion (only removes Jožin-generated files)
+
+**CLI Usage:**
+```bash
+jozin cleanup ~/Photos --only-sidecars --dry-run
+jozin cleanup ~/Photos --only-thumbnails --recursive
+jozin cleanup ~/Photos --recursive  # Remove all generated files
+```
+
+**Output:** JSON with deleted file paths and timing metadata
+
+---
+
+### verify - Sidecar Validation
+
+**Status:** ⚠️ Minimal Stub (core/src/verify.rs) - **Task 1-2 in TASKMASTER_PLAN.md**
+
+**Planned Features:**
+- Sidecar existence check (detect missing `.json` files)
+- JSON parsing and validation (handle corrupt/malformed JSON)
+- Schema version compatibility check
+- Hash staleness detection (file modified after scan)
+- Action recommendations (noop/rescan/migrate)
+- Fix mode (auto-repair minor issues)
+
+**Planned CLI Usage:**
+```bash
+jozin verify ~/Photos --recursive
+jozin verify ~/Photos --fix --strict
+```
+
+**Planned Output:** JSON with validation status (ok/stale/missing/corrupt) and suggested actions
+
+---
+
+### migrate - Schema Version Upgrades
+
+**Status:** ⚠️ Minimal Stub (core/src/migrate.rs) - **Task 3-4 in TASKMASTER_PLAN.md**
+
+**Planned Features:**
+- Auto-detect source schema version
+- Version upgrade transformations (e.g., split camera field)
+- Backup rotation (`.bak1`, `.bak2`, `.bak3`)
+- Dry-run mode (preview changes)
+- Idempotent migrations (safe to run multiple times)
+- Atomic writes (`.tmp` → fsync → rename)
+
+**Planned CLI Usage:**
+```bash
+jozin migrate ~/Photos --to v2 --dry-run
+jozin migrate ~/Photos --from v1 --to v2 --backup
+```
+
+**Planned Output:** JSON with migrated paths, version changes, backup locations
+
+---
+
+### faces - Face Detection & Identification
+
+**Status:** 🔒 Feature-Gated Stub (core/src/faces.rs) - **Phase 2+**
+
+**Planned Features:**
+- Local ONNX model execution (no cloud API calls)
+- Face detection in photos
+- Face embedding generation (for identification)
+- Person identification (match to known faces)
+- Training on labeled faces
+- Confidence scoring and thresholds
+
+**Planned CLI Usage:**
+```bash
+jozin faces ~/Photos --recursive --min-score 0.8
+jozin faces ~/Photos --identify --train faces.json
+```
+
+---
+
+### tags - Automatic Tagging
+
+**Status:** 🔒 Feature-Gated Stub (core/src/tags.rs) - **Phase 2+**
+
+**Planned Features:**
+- ML-based keyword detection (local models)
+- Rule-based tagging (EXIF context, filename patterns)
+- Tag confidence scoring
+- Append mode (keep existing user labels)
+- Batch processing with progress events
+
+**Planned CLI Usage:**
+```bash
+jozin tags ~/Photos --mode ml --min-score 0.6
+jozin tags ~/Photos --mode rules --append
+```
+
+---
+
+### thumbs - Thumbnail Generation
+
+**Status:** 🔒 Feature-Gated Stub (core/src/thumbs.rs) - **Phase 2+**
+
+**Planned Features:**
+- Multi-size thumbnail generation (256, 512, 1024, etc.)
+- Multiple output formats (JPEG, WebP)
+- Quality control (compression settings)
+- Overwrite mode (replace existing thumbnails)
+- Optimized for batch processing
+
+**Planned CLI Usage:**
+```bash
+jozin thumbs ~/Photos --sizes 256,512 --format webp
+jozin thumbs ~/Photos --quality 85 --overwrite
+```
+
+---
+
+## 💻 Development Setup
+
+### Prerequisites
+
+- **Rust** ≥ 1.75 ([rustup.rs](https://rustup.rs))
+- **Node.js** ≥ 20 (for Tauri app)
+- **just** task runner (optional): `cargo install just`
+
+### Build & Test
+
+```bash
+# Build all workspace members
+cargo build --workspace
+
+# Build with release optimizations
+cargo build --workspace --release
+
+# Run all tests (59 tests)
+cargo test --workspace
+
+# Run specific module tests
+cargo test --package jozin-core scan
+cargo test --package jozin cleanup
+
+# Check for linting issues
+cargo clippy --workspace
+
+# Build documentation
+cargo doc --workspace --no-deps --open
+```
+
+### Using the CLI
+
+```bash
+# Run from source (debug build)
+cargo run -p jozin -- --help
+cargo run -p jozin -- scan ~/Photos --dry-run
+
+# Build and install release binary
+cargo build --workspace --release
+sudo cp target/release/jozin /usr/local/bin/
+jozin --version
+
+# Using just (shortcut)
+just cli  # Runs: cargo run -p jozin -- scan ./Photos --dry-run
+```
+
+### Common Development Commands (just)
+
+```bash
+just build        # Build workspace
+just release      # Build release binaries
+just test         # Run all tests
+just cli          # Quick CLI test (scan --dry-run)
+just app-dev      # Launch Tauri app in dev mode
+```
+
+See `justfile` for all available commands.
+
+---
+
+## 🖥️ Tauri App Development
+
+**Status:** Basic structure exists, not yet implemented (Task 6)
+
+### Setup
+
 ```bash
 cd app
 npm install
 npm run tauri dev
 ```
 
-**Note:** The Tauri app is in early development. For now, use the CLI for testing and development.
+### Planned Features
 
-### 🎯 Build Status
+- Folder picker (drag-and-drop or button)
+- Real-time progress during operations
+- JSON result display (pretty-printed)
+- Tabs for Scan / Verify / Cleanup / Tags / Faces
+- Dark mode support
+- Native desktop integration (macOS, Windows, Linux)
 
-  ✅ cargo build --workspace          # Zero warnings
-  ✅ cargo build --workspace --release # Zero warnings
-  ✅ cargo test --workspace           # 58 tests passing
-  ✅ ./target/release/jozin --version # Binary works
+**See Task 6 in [TASKMASTER_PLAN.md](TASKMASTER_PLAN.md) for implementation plan.**
 
-### Common CLI Commands
+---
+
+## 🧪 Testing Strategy
+
+### Test Coverage (59 tests passing)
+
+- **23 CLI tests** - Parameter validation, help text, exit codes
+- **24 Core tests** - Scan, cleanup, core infrastructure
+- **12 Doc tests** - Code examples in documentation
+
+### Test Requirements
+
+All modules must handle:
+- **Paths:** Deep trees, Unicode, spaces, symlinks
+- **Files:** Large JPEG/PNG/HEIC/RAW, corrupt headers, missing EXIF
+- **OS:** macOS, Windows, Linux (CRLF, permissions)
+- **Concurrency:** Single-threaded vs multi-threaded (no race conditions)
+- **Determinism:** Same inputs → same outputs
+
+### Running Tests
 
 ```bash
-# Scan photos and generate sidecars
-jozin scan ~/Photos --recursive --dry-run
-jozin scan ~/Photos --recursive
+# All tests
+cargo test --workspace
 
-# Cleanup Jožin-generated files
-jozin cleanup ~/Photos --dry-run             # Preview what will be deleted
-jozin cleanup ~/Photos --only-sidecars       # Remove only JSON sidecars
-jozin cleanup ~/Photos --only-thumbnails -r  # Remove only thumbnails recursively
-jozin cleanup ~/Photos --recursive           # Remove all generated files
+# Specific module
+cargo test --package jozin-core scan::tests
+
+# Show test output
+cargo test --workspace -- --nocapture
+
+# Single test
+cargo test --package jozin-core test_scan_directory
 ```
 
 ---
 
-## Privacy & Security
+## 📋 File Layout & Sidecar Policy
 
--	Originals are read-only and never modified.
--	No analytics, telemetry, or background network connections.
--	All computation happens locally — no data ever leaves your computer.
--	Face recognition runs with local ONNX models; embeddings can be hashed or salted for privacy.
--	JSON sidecars contain only metadata you explicitly approve.
+Jožin stores metadata **adjacent to original files** (no hidden `.jozin/` trees):
+
+```
+/photos/
+├─ 2020/
+│  ├─ IMG_1234.JPG
+│  ├─ IMG_1234.JPG.json        # Sidecar with metadata
+│  ├─ IMG_1234.JPG.json.bak1   # Backup (after migration)
+│  ├─ IMG_1234_256.jpg         # Optional thumbnail
+│  └─ IMG_1234_512.webp        # Optional thumbnail
+└─ jozin.journal.ndjson         # Optional operation log (Phase 2)
+```
+
+### Sidecar Writing Strategy
+
+- **Atomic writes:** `.tmp` → `fsync` → `rename`
+- **Backup rotation:** `.bak1`, `.bak2`, `.bak3` (keeps 3 versions)
+- **Never modify originals:** Photos are read-only
 
 ---
 
-## Technology Stack
+## 🗺️ Roadmap
+
+### Phase 1 - Basic Functionality (Near Complete)
+
+- [x] Workspace structure
+- [x] CLI with parameter validation
+- [x] scan module (full implementation)
+- [x] cleanup module (full implementation)
+- [ ] verify module (Tasks 1-2)
+- [ ] migrate module (Tasks 3-4)
+- [ ] Phase 1 validation (Task 5)
+
+### Phase 2 - Robustness & Performance
+
+- [ ] Bounded parallelism (`--max-threads`)
+- [ ] Journal support (resumable scans)
+- [ ] Progress events API
+- [ ] Perceptual hash (duplicate detection)
+- [ ] Pixel hash (cross-format duplicates)
+
+### Phase 2+ - Advanced Features
+
+- [ ] Face detection & identification
+- [ ] ML-based tagging
+- [ ] Thumbnail generation
+- [ ] Tauri desktop UI (Tasks 6-7)
+
+**See [TASKMASTER_PLAN.md](TASKMASTER_PLAN.md) for detailed task breakdown.**
+
+---
+
+## 🛡️ Privacy & Security
+
+- **Originals are read-only** - Never modified
+- **No telemetry** - No analytics, no network calls
+- **100% local** - All computation on your machine
+- **Local ML models** - Face recognition uses ONNX (no cloud APIs)
+- **User control** - JSON sidecars contain only metadata you approve
+
+---
+
+## 🔧 Technology Stack
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | Core | Rust | High-performance, memory-safe processing |
-| UI | Tauri + React | Lightweight, cross-platform desktop app |
-| Hash | BLAKE3 | Ultra-fast, parallel file fingerprinting |
-| ML | ONNX Runtime (planned) | Local face and tag recognition |
-| Schema | JSON Schema | Stable data contracts for sidecars |
-| Tasks | Just / Cargo | Build, test, and run automation |
+| Hashing | BLAKE3 | Ultra-fast parallel file fingerprinting |
+| CLI | Clap | Comprehensive argument parsing |
+| UI | Tauri + React | Lightweight cross-platform desktop app |
+| ML | ONNX Runtime | Local face and tag recognition (planned) |
+| Schema | JSON | Versioned sidecar metadata |
+| Tasks | Just / Cargo | Build and test automation |
 
 ---
 
-## Roadmap
+## 🤖 AI-Assisted Development
 
--	Project workspace structure
--	CLI prototype (scan, verify)
--	JSON sidecar v1 schema
--	Tauri desktop UI prototype
--	Face and tag recognition (local models)
--	Thumbnail generation pipeline
--	Sidecar migration + versioning system
--	Backup/export features
--	Public beta release
+Jožin is built using **AI coding assistants** (GPT, Claude, Gemini) as a teaching example of **human-AI collaboration** in software engineering.
 
----
+**Development workflow:**
+1. **Spec-first** - Define requirements in markdown (SCOPE.md, TASK+PHASE_PLAN.md)
+2. **AI-generated code** - Implement modules with AI assistance
+3. **Test-driven validation** - Verify with comprehensive test suites
+4. **Iterative refinement** - Review, refine, and iterate
 
-## AI-Assisted Development
-
-Jožin is also an experiment in **AI-augmented software engineering**.
-Development steps follow a **spec-first → code → test** workflow guided by multiple AI systems (GPT, Claude, Gemini).
-The project serves as both a real application and a teaching example for **how to safely and effectively build software with AI tools**.
+**Key documents:**
+- `SCOPE.md` - Architectural constraints and design principles
+- `TASK+PHASE_PLAN.md` - Module parameters and acceptance criteria
+- `TASKMASTER_PLAN.md` - Current task breakdown (Tasks 1-7)
+- `CLAUDE.md` - AI assistant guidance for this codebase
 
 ---
 
@@ -216,12 +474,12 @@ The project serves as both a real application and a teaching example for **how t
 
 ---
 
-## 🛡️ Copyright & Ownership
+## 📄 Copyright & Ownership
 
 © 2025 **5 Leaves s.r.o.** — All Rights Reserved.
-“Jožin” and all related materials are proprietary software and intellectual property of **5 Leaves (5LVES.com)**.
+
+"Jožin" and all related materials are proprietary software and intellectual property of **5 Leaves (5LVES.com)**.
 
 Unauthorized copying, modification, distribution, or disclosure of this software or its documentation, in whole or in part, is strictly prohibited without prior written consent from 5 Leaves s.r.o.
 
-For licensing or partnership inquiries, please contact:
-**info@5lves.com**
+For licensing or partnership inquiries, please contact: **info@5lves.com**

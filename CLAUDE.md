@@ -189,9 +189,12 @@ Jožin stores metadata **adjacent to original files** (no hidden `.jozin/` trees
 
 ### Cache & Temporary Files
 
-- Cache location: OS temp directory (e.g., `/tmp/jozin-*`)
-- Auto-cleaned before and after each run
-- Models stored in app data dir: `~/Library/Application Support/Jožin/models` (macOS)
+- **Cache location:** OS temp directory (e.g., `/tmp/jozin-*`)
+- **Auto-cleaned:** Before and after each run
+- **Models:** App data dir `~/Library/Application Support/Jožin/models` (macOS)
+- **No .jozin/ directory:** Unlike earlier designs, Jožin keeps all metadata adjacent to photos (no hidden folder trees)
+
+**Note:** Earlier documentation may reference `.jozin/` directories - this design was changed to keep metadata adjacent to originals for maximum transparency and user control.
 
 ## Development Phases
 
@@ -201,16 +204,29 @@ The project follows a **phased plan** (see `TASK+PHASE_PLAN.md`):
 - **Phase 1** - Minimal functional core (each module implements basic operations)
 - **Phase 2** - Robustness & performance (parallelism, journaling, progress API)
 
-### Current State
+### Current State (Updated 2025-10-21)
 
-The codebase is in **Phase 1**:
-- Workspace structure is set up
-- CLI fully implements `scan` and `cleanup` subcommands
-- `verify` and `migrate` subcommands are stubs (return parameters as JSON)
-- Phase 2+ modules (`faces`, `tags`, `thumbs`) are feature-gated stubs
-- All core tests passing (58 tests: 23 CLI + 24 core + 11 doc)
-- Zero compiler warnings
-- Production-ready build
+The codebase is in **Phase 1 - Near Completion**:
+
+**✅ Fully Implemented:**
+- Workspace structure with 3 cargo members (core, cli, app)
+- CLI fully implements `scan` and `cleanup` subcommands with comprehensive parameter validation
+- `scan` module - Directory traversal, EXIF extraction, BLAKE3 hashing, sidecar generation
+- `cleanup` module - Selective cleanup (sidecars, thumbnails, backups, cache)
+- Core infrastructure - Error types, timing metadata, pipeline signatures
+- Test suite - 59 tests passing (23 CLI + 24 core + 12 doc tests)
+- Zero compiler warnings, production-ready build
+
+**⚠️ Minimal Stubs (Phase 1 incomplete):**
+- `verify` module - 10-line stub in core/src/verify.rs (returns parameters as JSON)
+- `migrate` module - 10-line stub in core/src/migrate.rs (returns parameters as JSON)
+
+**🔒 Phase 2+ Modules (Feature-gated):**
+- `faces`, `tags`, `thumbs` - Declared as Cargo features with minimal stubs
+- Tauri app - Basic structure exists in app/ directory, not yet implemented
+- Parallelism, journaling, progress API - Not started
+
+**Next Steps:** See TASKMASTER_PLAN.md for detailed task breakdown (Tasks 1-7) to complete Phase 1 and transition to Phase 2
 
 ## Key Technical Decisions
 
@@ -249,8 +265,24 @@ This project is **intentionally built using AI coding assistants** (GPT, Claude,
 
 1. Check `SCOPE.md` for architectural constraints
 2. Consult `TASK+PHASE_PLAN.md` for module parameters & acceptance criteria
-3. Maintain deterministic, testable outputs
-4. Use structured JSON for all CLI output
+3. Review `TASKMASTER_PLAN.md` for current task breakdown and status
+4. Maintain deterministic, testable outputs
+5. Use structured JSON for all CLI output
+
+## Task Planning & Tracking
+
+The project uses `TASKMASTER_PLAN.md` as the source of truth for development tasks:
+
+- **7 Tasks Defined** - Task 1-7 covering Phase 1 completion and Phase 2 preparation
+- **Task Dependencies** - Clear execution order and blocking relationships
+- **Acceptance Criteria** - Each task has explicit validation requirements
+- **Current Focus** - Tasks 1-4 implement verify and migrate modules to complete Phase 1
+
+When implementing features, always check TASKMASTER_PLAN.md for:
+- Detailed technical specifications
+- Required data structures and output formats
+- Test coverage requirements
+- Integration with existing modules
 
 ## Privacy & Security Principles
 
@@ -266,3 +298,12 @@ This project is **intentionally built using AI coding assistants** (GPT, Claude,
 - Use `just` task runner for common operations (see `justfile`)
 - Core library uses **Cargo features** for optional modules (`faces`, `tags`, `thumbs`)
 - All operations must return timing data (`started_at`, `finished_at`, `duration_ms`)
+
+## Docs
+.agent
+- Tasks: PRD & implementation plan for each feature
+- System: Document the current state of the system (project structure, tech stack, integration points, 
+  database schema, and core functionalities such as agent architecture, LLM layer, etc.)
+- SOP: Best practices of execute certain tasks (e.g. how to add a schema migration, how to add a new 
+  page route, etc.)
+- README.md: an index of all the documentations we have so people know what & where to look for things
